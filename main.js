@@ -684,7 +684,7 @@ function draw() {
                 text(`${pad(i + 1)}.`, 10, placarOff + (i * 15));
                 text(`${colocacao[i].name}`, 50, placarOff + (i * 15));
                 text(`  ${colocacao[i].x.toFixed(0)}`, 130, placarOff + (i * 15));
-                text(`Pontos: ${colocacao[i].score.toFixed(0)}`, 200, placarOff + (i * 15));
+                text(`Pontos: ${colocacao[i].score.toFixed(0)}`, 180, placarOff + (i * 15));
             } else {
                 text(`${pad(i + 1)}.`, 10, placarOff + (i * 15));
                 text(`${colocacao[i].name}`, 50, placarOff + (i * 15));
@@ -714,7 +714,8 @@ function draw() {
 
         const maxScore = tmpEvolucao.reduce((a, b) => (b.score > a.score ? b : a))
         const minScore = tmpEvolucao.reduce((a, b) => (b.score < a.score ? b : a))
-        const maxCols = (width/2)/20;
+        const maxCols = 3 // (width/2)/20; // Exemplo 40 mostra os últimos 40 no gráfico.
+        let melhorVisivel = -1;
         let divBy = 150 / maxScore.score;
         const offSetY = minScore.score * divBy;
         let xGeracao = 0;
@@ -743,10 +744,12 @@ function draw() {
             
             noStroke();
             if (tmpEvolucao[i] == maxScore) {
+                melhorVisivel = i;
                 fill(tmpEvolucao[i].corFundo);
                 text(`${tmpEvolucao[i].name} (${tmpEvolucao[i].score.toFixed(0)})`,gx1-45, gy1-10);
             }
             if (tmpEvolucao[i+1] == maxScore) {
+                melhorVisivel = i+1
                 fill(tmpEvolucao[i].corFundo);
                 text(`${tmpEvolucao[i+1].name} (${tmpEvolucao[i+1].score.toFixed(0)})`,gx2-45, gy2-10);
             }
@@ -757,8 +760,10 @@ function draw() {
         fill(100);
         text('Geração:', xGeracao-70, goY);
         textSize(12);
-        textAlign(CENTER);
-        text(`Melhor: ${maxScore.name} (${maxScore.score.toFixed(0)})`,width-(width/4), 20);
+        textAlign(RIGHT);
+        if (melhorVisivel == -1) {
+            text(`Melhor: ${maxScore.name} (${maxScore.score.toFixed(0)})`,width-10, 20);
+        }
         textAlign(LEFT);
 
         if (false) {
