@@ -11,7 +11,7 @@ O de TINT() deixa lento!
 let evolucao = [];
 let nGeracao = 1;
 let showSensors = false;
-let qtdDinos = 4;
+let qtdDinos = 40;
 let gameVelocity = 6;
 let step = 0;
 let bar = 0;
@@ -69,9 +69,10 @@ class Nuvem {
 }
 class Terreno {
     constructor() {
+        this.largura = 2300;
         this.x1 = 0;
-        this.x2 = 2400;
-        this.x3 = 2400 + 2400;
+        this.x2 = this.largura;
+        this.x3 = this.largura + this.largura;
         this.y = height - 26;
         this.sprite = spritesheet.get(0, 104, 2400, 26);
     }
@@ -91,12 +92,12 @@ class Terreno {
         this.x2 -= gameVelocity;
         this.x3 -= gameVelocity;
 
-        if (this.x1 + 2400 < 0)
-            this.x1 = 2400 * 2;
-        if (this.x2 + 2400 < 0)
-            this.x2 = 2400 * 2;
-        if (this.x3 + 2400 < 0)
-            this.x3 = 2400 * 2;
+        if (this.x1 + this.largura < 0)
+            this.x1 = this.largura * 2;
+        if (this.x2 + this.largura < 0)
+            this.x2 = this.largura * 2;
+        if (this.x3 + this.largura < 0)
+            this.x3 = this.largura * 2;
     }
 }
 
@@ -169,7 +170,6 @@ class dino {
         this.acelerando = false;
         this.freando = false;
         this.padx = this.x - 50;
-        this.obsPulados = 0;
 
         this.redeNeural = new RedeNeural();
 
@@ -476,24 +476,7 @@ function keyPressed() {
                     dino.up();
                 }
             }
-    }
-
-    if (keyIsDown(RIGHT_ARROW)) {
-
-        for (let dino of dinos) {
-            if (!dino.inteligente) {
-                dino.acelerar();
-            }
-        }
-    }
-    if (keyIsDown(LEFT_ARROW)) {
-
-        for (let dino of dinos) {
-            if (!dino.inteligente) {
-                dino.freiar();
-            }
-        }
-    }
+    }    
 
 }
 function mousePressed() {
@@ -550,6 +533,23 @@ function draw() {
     background(255 - (slider.value() * 30));
     // scale(1.2);  // Zoom
 
+    if (keyIsDown(RIGHT_ARROW)) {
+
+        for (let dino of dinos) {
+            if (!dino.inteligente) {
+                dino.acelerar();
+            }
+        }
+    }
+    if (keyIsDown(LEFT_ARROW)) {
+
+        for (let dino of dinos) {
+            if (!dino.inteligente) {
+                dino.freiar();
+            }
+        }
+    }    
+
     terreno.show();
     terreno.atualiza();
 
@@ -566,16 +566,17 @@ function draw() {
     for (let nuvem of nuvens) {
         nuvem.show();
         nuvem.atualiza();
-    }
+    }    
     for (let nuvem of nuvens) {
         if (nuvem.x + 100 < 0) {
+            nuvens.sort(function (a, b) { return a.x - b.x });
             nuvens.shift();
         }
     }
 
     if (frameCount % 90 == 0) {
         obstaculos.push(new obstaculo(width + 400 + Math.random() * 300, 60 + Math.random() * 40, 60 + Math.random() * 40));
-    }
+    }    
 
     for (let obstaculo of obstaculos) {
 
@@ -656,6 +657,8 @@ function draw() {
     // text(`Dinos vivos: ${dinosVivos} Velocidade: ${gameVelocity} Obst: ${obstaculos.length} Geração: ${nGeracao}`, 20, 20);
     textAlign(CENTER);
     text(`Velocidade: ${gameVelocity}`, width/3, 20);
+    textSize(10);
+    text(`Fps: ${Math.floor(getFrameRate())}`,width/3,40);    
     textSize(18);
     text('IA jogando Dino!',width/2,20);
     textSize(14);
@@ -737,7 +740,7 @@ function draw() {
             strokeWeight(10);
             point(gx1, gy1);
             point(gx2, gy2);
-            strokeWeight(1);
+            strokeWeight(0);
             fill(50, 50, 255);
             text(i + 1, goX + (i * 20) - 5, goY);
             text(i + 2, goX + ((i + 1) * 20) - 5, goY);
