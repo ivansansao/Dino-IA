@@ -11,7 +11,7 @@ O de TINT() deixa lento!
 let evolucao = [];
 let nGeracao = 1;
 let showSensors = false;
-let qtdDinos = 40;
+let qtdDinos = 4;
 let gameVelocity = 6;
 let step = 0;
 let bar = 0;
@@ -69,7 +69,7 @@ class Nuvem {
 }
 class Terreno {
     constructor() {
-        this.largura = 2300;
+        this.largura = 2380;
         this.x1 = 0;
         this.x2 = this.largura;
         this.x3 = this.largura + this.largura;
@@ -123,6 +123,12 @@ class RedeNeural {
 
             return outputs
         });
+    }
+    imprimir() {
+        for (let i = 0; i < this.model.getWeights().length; i++) {
+            console.log(this.model.getWeights()[i].print());
+        }
+
     }
     mutate(rate) {
         tf.tidy(() => {
@@ -431,14 +437,14 @@ function nextGeneration() {
 
     nGeracao++;
 
-    console.log(`Geração ${nGeracao}! Clonando ${colocacao[0].name} com Score: ${colocacao[0].score.toFixed(0)}!`)
+    // console.log(`Geração ${nGeracao}! Clonando ${colocacao[0].name} com Score: ${colocacao[0].score.toFixed(0)}!`)
 
     endgame = false;
     gameVelocity = 6;
     obstaculos = [];
     dinos = [];
 
-    const weights = colocacao[0].redeNeural.model.getWeights();
+    const weights = colocacao[0].redeNeural.model.getWeights();    
 
     const weightCopies = [];
     for (let i = 0; i < weights.length; i++) {
@@ -476,7 +482,7 @@ function keyPressed() {
                     dino.up();
                 }
             }
-    }    
+    }
 
 }
 function mousePressed() {
@@ -548,7 +554,7 @@ function draw() {
                 dino.freiar();
             }
         }
-    }    
+    }
 
     terreno.show();
     terreno.atualiza();
@@ -566,7 +572,7 @@ function draw() {
     for (let nuvem of nuvens) {
         nuvem.show();
         nuvem.atualiza();
-    }    
+    }
     for (let nuvem of nuvens) {
         if (nuvem.x + 100 < 0) {
             nuvens.sort(function (a, b) { return a.x - b.x });
@@ -576,7 +582,7 @@ function draw() {
 
     if (frameCount % 90 == 0) {
         obstaculos.push(new obstaculo(width + 400 + Math.random() * 300, 60 + Math.random() * 40, 60 + Math.random() * 40));
-    }    
+    }
 
     for (let obstaculo of obstaculos) {
 
@@ -656,13 +662,13 @@ function draw() {
     textSize(14);
     // text(`Dinos vivos: ${dinosVivos} Velocidade: ${gameVelocity} Obst: ${obstaculos.length} Geração: ${nGeracao}`, 20, 20);
     textAlign(CENTER);
-    text(`Velocidade: ${gameVelocity}`, width/3, 20);
+    text(`Velocidade: ${gameVelocity}`, width / 3, 20);
     textSize(10);
-    text(`Fps: ${Math.floor(getFrameRate())}`,width/3,40);    
+    text(`Fps: ${Math.floor(getFrameRate())}`, width / 3, 40);
     textSize(18);
-    text('IA jogando Dino!',width/2,20);
+    text('IA jogando Dino!', width / 2, 20);
     textSize(14);
-    text('(Ivan Sansão)',width/2,40);    
+    text('(Ivan Sansão)', width / 2, 40);
     textSize(14);
     textAlign(LEFT);
 
@@ -695,7 +701,7 @@ function draw() {
             }
         }
 
-        if (i > 9) {
+        if (i > 8) {
             break;
         }
     }
@@ -717,7 +723,7 @@ function draw() {
 
         const maxScore = tmpEvolucao.reduce((a, b) => (b.score > a.score ? b : a))
         const minScore = tmpEvolucao.reduce((a, b) => (b.score < a.score ? b : a))
-        const maxCols = (width/2)/20; // Você pode especifial manualmente exemplo 40 mostra os últimos 40 no gráfico.
+        const maxCols = (width / 2) / 20; // Você pode especifial manualmente exemplo 40 mostra os últimos 40 no gráfico.
         let melhorVisivel = -1;
         let divBy = 150 / maxScore.score;
         const offSetY = minScore.score * divBy;
@@ -725,7 +731,7 @@ function draw() {
 
         textSize(14);
         for (let i = Math.max(0, tmpEvolucao.length - maxCols); i < tmpEvolucao.length - 1; i++) {
-            
+
             const gx1 = goX + (i * 20);
             const gx2 = goX + ((i + 1) * 20);
             const gy1 = goY - (tmpEvolucao[i].score * divBy) + offSetY - 20;
@@ -744,29 +750,29 @@ function draw() {
             fill(50, 50, 255);
             text(i + 1, goX + (i * 20) - 5, goY);
             text(i + 2, goX + ((i + 1) * 20) - 5, goY);
-            
+
             noStroke();
             fill(80);
             if (tmpEvolucao[i] == maxScore) {
                 melhorVisivel = i;
                 // fill(tmpEvolucao[i].corFundo);
-                text(`${tmpEvolucao[i].name} (${tmpEvolucao[i].score.toFixed(0)})`,gx1-45, gy1-10);
+                text(`${tmpEvolucao[i].name} (${tmpEvolucao[i].score.toFixed(0)})`, gx1 - 45, gy1 - 10);
             }
-            if (tmpEvolucao[i+1] == maxScore) {
-                melhorVisivel = i+1
+            if (tmpEvolucao[i + 1] == maxScore) {
+                melhorVisivel = i + 1
                 // fill(tmpEvolucao[i].corFundo);
-                text(`${tmpEvolucao[i+1].name} (${tmpEvolucao[i+1].score.toFixed(0)})`,gx2-45, gy2-10);
+                text(`${tmpEvolucao[i + 1].name} (${tmpEvolucao[i + 1].score.toFixed(0)})`, gx2 - 45, gy2 - 10);
             }
 
         }
         textSize(14);
         noStroke();
         fill(100);
-        text('Geração:', xGeracao-70, goY);
+        text('Geração:', xGeracao - 70, goY);
         textSize(12);
         textAlign(RIGHT);
         if (melhorVisivel == -1) {
-            text(`Melhor: ${maxScore.name} (${maxScore.score.toFixed(0)})`,width-10, 20);
+            text(`Melhor: ${maxScore.name} (${maxScore.score.toFixed(0)})`, width - 10, 20);
         }
         textAlign(LEFT);
 
@@ -781,6 +787,12 @@ function draw() {
             strokeWeight(8);
             point(goX, goY);
         }
+    }
+
+    if (keyIsDown(DOWN_ARROW)) {
+        console.log(colocacao[0].name);
+        colocacao[0].redeNeural.imprimir();
+        noLoop();
     }
 
     if (showSensors) {
@@ -819,5 +831,5 @@ function draw() {
 }
 
 function pad(i = 0, l = 2) {
-    return String(i).padStart(l,'0')
+    return String(i).padStart(l, '0')
 }
