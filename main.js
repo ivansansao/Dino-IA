@@ -714,7 +714,7 @@ function draw() {
 
         const maxScore = tmpEvolucao.reduce((a, b) => (b.score > a.score ? b : a))
         const minScore = tmpEvolucao.reduce((a, b) => (b.score < a.score ? b : a))
-        const maxCols = 3 // (width/2)/20; // Exemplo 40 mostra os últimos 40 no gráfico.
+        const maxCols = (width/2)/20; // Você pode especifial manualmente exemplo 40 mostra os últimos 40 no gráfico.
         let melhorVisivel = -1;
         let divBy = 150 / maxScore.score;
         const offSetY = minScore.score * divBy;
@@ -743,14 +743,15 @@ function draw() {
             text(i + 2, goX + ((i + 1) * 20) - 5, goY);
             
             noStroke();
+            fill(80);
             if (tmpEvolucao[i] == maxScore) {
                 melhorVisivel = i;
-                fill(tmpEvolucao[i].corFundo);
+                // fill(tmpEvolucao[i].corFundo);
                 text(`${tmpEvolucao[i].name} (${tmpEvolucao[i].score.toFixed(0)})`,gx1-45, gy1-10);
             }
             if (tmpEvolucao[i+1] == maxScore) {
                 melhorVisivel = i+1
-                fill(tmpEvolucao[i].corFundo);
+                // fill(tmpEvolucao[i].corFundo);
                 text(`${tmpEvolucao[i+1].name} (${tmpEvolucao[i+1].score.toFixed(0)})`,gx2-45, gy2-10);
             }
 
