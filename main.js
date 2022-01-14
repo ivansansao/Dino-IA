@@ -12,7 +12,7 @@ let imprimirRNMelhor = false;
 let evolucao = [];
 let nGeracao = 1;
 let showSensors = false;
-let qtdDinos = 4;
+let qtdDinos = 200;
 let gameVelocity = 6;
 let step = 0;
 let bar = 0;
@@ -305,7 +305,7 @@ class dino {
 
     acelerar() {
         if (this.onFloor()) {
-            if (this.x + this.largura < width) {
+            if (this.x + this.largura < width-(width/4)) {
                 this.x++;
                 this.acelerando = true;
             }
