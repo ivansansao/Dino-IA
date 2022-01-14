@@ -729,13 +729,14 @@ function draw() {
 
         const maxScore = tmpEvolucao.reduce((a, b) => (b.score > a.score ? b : a))
         const minScore = tmpEvolucao.reduce((a, b) => (b.score < a.score ? b : a))
-        const maxCols = (width / 2) / 20; // Você pode especifial manualmente exemplo 40 mostra os últimos 40 no gráfico.
+        const maxCols = Math.floor((width / 2) / 20); // Você pode especifial manualmente exemplo 40 mostra os últimos 40 no gráfico.
         let melhorVisivel = -1;
         let divBy = 150 / maxScore.score;
         const offSetY = minScore.score * divBy;
         let xGeracao = 0;
 
         textSize(14);
+        
         for (let i = Math.max(0, tmpEvolucao.length - maxCols); i < tmpEvolucao.length - 1; i++) {
 
             const gx1 = goX + (i * 20);
@@ -806,7 +807,7 @@ function draw() {
         text(`x:${mouseX} y:${mouseY}`, mouseX, mouseY);
     }
 
-    if (frameCount % 1000 == 0) {
+    if (frameCount % 500 == 0) {
         gameVelocity++;
 
     }
