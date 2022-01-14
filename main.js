@@ -175,7 +175,7 @@ class dino {
         this.sprite = 1;
         this.acelerando = false;
         this.freando = false;
-        this.padx = this.x - 50;
+        this.padx = this.x * 0.25;
 
         this.redeNeural = new RedeNeural();
 
@@ -315,6 +315,11 @@ class dino {
                 this.acelerar();
             } else if (maiorI == 2) {
                 this.freiar();
+            }
+
+            if (showSensors) {
+                fill(255,80,80);
+                text(`Pula: ${resposta[0]}\nAcelera: ${resposta[1]}\nFreia: ${resposta[2]}\nM:${maiorI}`,this.x, this.y-100);
             }
 
         }
@@ -460,6 +465,7 @@ function nextGeneration() {
         }
         dinos.push(child);
     }
+    // dinos.push(new dino('You', false));
 
 }
 
