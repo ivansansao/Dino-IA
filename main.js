@@ -8,6 +8,7 @@ O de TINT() deixa lento!
 
 */
 
+let imprimirRNMelhor = false;
 let evolucao = [];
 let nGeracao = 1;
 let showSensors = false;
@@ -40,7 +41,8 @@ let primeiroColocado = null;
 let segundoColocado = null;
 let terceiroColocado = null;
 let colocacao = [];
-
+let fpsMin = 999;
+let fpsMax = 0;
 
 // let speedBut;
 
@@ -124,10 +126,33 @@ class RedeNeural {
             return outputs
         });
     }
+    imprimirRede() {
+        const weights = this.model.getWeights();
+        let linhas = '';
+        let colunas = '';
+ 
+        for (let i = 0; i < weights.length; i++) {
+            let tensor = weights[i];
+            let values = tensor.dataSync().slice();
+            colunas = '';
+            for (let j = 0; j < values.length; j++) {
+                let w = values[j];
+                colunas = `${colunas} ${w}`;
+            }
+
+            text(`${colunas}`,width/4,70+(i*20));
+        }
+    }
     imprimir() {
+        console.log('------ SEPARACAO ANTES -------');
         for (let i = 0; i < this.model.getWeights().length; i++) {
             console.log(this.model.getWeights()[i].print());
+            
         }
+        console.log('------ SEPARACAO depois -------');
+
+        
+       
 
     }
     mutate(rate) {
@@ -318,8 +343,8 @@ class dino {
             }
 
             if (showSensors) {
-                fill(255,80,80);
-                text(`Pula: ${resposta[0]}\nAcelera: ${resposta[1]}\nFreia: ${resposta[2]}\nM:${maiorI}`,this.x, this.y-100);
+                fill(255, 80, 80);
+                text(`Pula: ${resposta[0]}\nAcelera: ${resposta[1]}\nFreia: ${resposta[2]}\nM:${maiorI}`, this.x, this.y - 100);
             }
 
         }
@@ -441,6 +466,8 @@ function nextGeneration() {
     evolucao.push(colocacao[0]);
 
     nGeracao++;
+    fpsMax = 0;
+    fpsMin = 999;
 
     // console.log(`Geração ${nGeracao}! Clonando ${colocacao[0].name} com Score: ${colocacao[0].score.toFixed(0)}!`)
 
@@ -449,7 +476,7 @@ function nextGeneration() {
     obstaculos = [];
     dinos = [];
 
-    const weights = colocacao[0].redeNeural.model.getWeights();    
+    const weights = colocacao[0].redeNeural.model.getWeights();
 
     const weightCopies = [];
     for (let i = 0; i < weights.length; i++) {
@@ -462,6 +489,7 @@ function nextGeneration() {
         if (i % 2 == 0) {
             // console.log(`${child.name} mutado!`);
             child.redeNeural.mutate(0.1);
+            child.name = child.name+".";
         }
         dinos.push(child);
     }
@@ -670,7 +698,8 @@ function draw() {
     textAlign(CENTER);
     text(`Velocidade: ${gameVelocity}`, width / 3, 20);
     textSize(10);
-    text(`Fps: ${Math.floor(getFrameRate())}`, width / 3, 40);
+    let medFps = (Number(fpsMin)+Number(fpsMax))/2;
+    text(`Fps (${fpsMin}-${fpsMax} M${medFps.toFixed(0)}): ${Math.floor(getFrameRate())}`, width / 3, 40);
     textSize(18);
     text('IA jogando Dino!', width / 2, 20);
     textSize(14);
@@ -680,7 +709,7 @@ function draw() {
 
     // PLACAR.
 
-    const placarOff = 20;
+    const placarOff = 80;
 
     // noFill();
     // stroke(200);
@@ -736,7 +765,7 @@ function draw() {
         let xGeracao = 0;
 
         textSize(14);
-        
+
         for (let i = Math.max(0, tmpEvolucao.length - maxCols); i < tmpEvolucao.length - 1; i++) {
 
             const gx1 = goX + (i * 20);
@@ -801,6 +830,9 @@ function draw() {
         colocacao[0].redeNeural.imprimir();
         noLoop();
     }
+    if (imprimirRNMelhor) {
+        colocacao[0].redeNeural.imprimirRede();
+    }
 
     if (showSensors) {
         fill(0);
@@ -834,6 +866,11 @@ function draw() {
         clear();
 
     }
+
+    if (getFrameRate() > fpsMax)
+        fpsMax = getFrameRate().toFixed(0);
+    if (getFrameRate() < fpsMin && getFrameRate() > 0)
+        fpsMin = getFrameRate().toFixed(0);
 
 }
 
