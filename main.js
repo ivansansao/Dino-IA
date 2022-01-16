@@ -12,7 +12,7 @@ let imprimirRNMelhor = false;
 let evolucao = [];
 let nGeracao = 1;
 let showSensors = false;
-let qtdDinos = 200;
+let qtdDinos = 3;
 let gameVelocity = 6;
 let step = 0;
 let bar = 0;
@@ -43,7 +43,7 @@ let terceiroColocado = null;
 let colocacao = [];
 let fpsMin = 999;
 let fpsMax = 0;
-
+let fpsAtu = 0;
 // let speedBut;
 
 // class geracaoData {
@@ -130,7 +130,7 @@ class RedeNeural {
         const weights = this.model.getWeights();
         let linhas = '';
         let colunas = '';
- 
+
         for (let i = 0; i < weights.length; i++) {
             let tensor = weights[i];
             let values = tensor.dataSync().slice();
@@ -140,19 +140,19 @@ class RedeNeural {
                 colunas = `${colunas} ${w}`;
             }
 
-            text(`${colunas}`,width/4,70+(i*20));
+            text(`${colunas}`, width / 4, 70 + (i * 20));
         }
     }
     imprimir() {
         console.log('------ SEPARACAO ANTES -------');
         for (let i = 0; i < this.model.getWeights().length; i++) {
             console.log(this.model.getWeights()[i].print());
-            
+
         }
         console.log('------ SEPARACAO depois -------');
 
-        
-       
+
+
 
     }
     mutate(rate) {
@@ -305,7 +305,7 @@ class dino {
 
     acelerar() {
         if (this.onFloor()) {
-            if (this.x + this.largura < width-(width/4)) {
+            if (this.x + this.largura < width - (width / 4)) {
                 this.x++;
                 this.acelerando = true;
             }
@@ -343,6 +343,7 @@ class dino {
             }
 
             if (showSensors) {
+                noStroke()
                 fill(255, 80, 80);
                 text(`Pula: ${resposta[0]}\nAcelera: ${resposta[1]}\nFreia: ${resposta[2]}\nM:${maiorI}`, this.x, this.y - 100);
             }
@@ -401,6 +402,7 @@ class obstaculo {
             stroke(this.corFundo);
             drawingContext.setLineDash([5, 5]);
             rect(this.x, this.topY, this.largura, this.altura);
+            drawingContext.setLineDash([]);
         }
         image(cacto1, spriteX, spriteY);
 
@@ -489,7 +491,7 @@ function nextGeneration() {
         if (i % 2 == 0) {
             // console.log(`${child.name} mutado!`);
             child.redeNeural.mutate(0.1);
-            child.name = child.name+".";
+            child.name = child.name + ".";
         }
         dinos.push(child);
     }
@@ -509,13 +511,9 @@ function proximoObstaculo(dino, obstaculos) {
 }
 
 function keyPressed() {
-    switch (key) {
-        case ' ':
-            for (let dino of dinos) {
-                if (!dino.inteligente) {
-                    dino.up();
-                }
-            }
+
+    if (key == 's') {
+        showSensors = !showSensors;
     }
 
 }
@@ -524,6 +522,7 @@ function mousePressed() {
 }
 
 function mouseReleased() {
+
     loop();
 }
 
@@ -536,7 +535,7 @@ function preload() {
 }
 function setup() {
 
-    createCanvas(windowWidth, 400);
+    createCanvas(windowWidth, windowHeight * 0.90);
     tf.setBackend('cpu');
     slider = createSlider(0, 10, 0);
     // speedBut = createSlider(1, 20, 6);
@@ -587,6 +586,15 @@ function draw() {
             if (!dino.inteligente) {
                 dino.freiar();
             }
+        }
+    }
+
+    if (keyIsDown(65)) { // a http://www.foreui.com/articles/Key_Code_Table.htm
+        dinos.push(new dino(false,true));
+    }
+    if (keyIsDown(77)) { // m
+        for (let dino of dinos) {
+            dino.morrer();
         }
     }
 
@@ -698,8 +706,15 @@ function draw() {
     textAlign(CENTER);
     text(`Velocidade: ${gameVelocity}`, width / 3, 20);
     textSize(10);
-    let medFps = (Number(fpsMin)+Number(fpsMax))/2;
-    text(`Fps (${fpsMin}-${fpsMax} M${medFps.toFixed(0)}): ${Math.floor(getFrameRate())}`, width / 3, 40);
+    let medFps = (Number(fpsMin) + Number(fpsMax)) / 2;
+    text(`Fps (${fpsMin}-${fpsMax} M${medFps.toFixed(0)}): ${fpsAtu}`, width / 3, 40);
+
+    if (frameCount % 60 == 0) {
+        fpsMin = 99;
+        fpsMax = 0;
+        fpsAtu = Math.floor(getFrameRate());
+    }
+
     textSize(18);
     text('IA jogando Dino!', width / 2, 20);
     textSize(14);
@@ -871,6 +886,7 @@ function draw() {
         fpsMax = getFrameRate().toFixed(0);
     if (getFrameRate() < fpsMin && getFrameRate() > 0)
         fpsMin = getFrameRate().toFixed(0);
+
 
 }
 
