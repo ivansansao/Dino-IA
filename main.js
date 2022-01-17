@@ -12,7 +12,8 @@ let imprimirRNMelhor = false;
 let evolucao = [];
 let nGeracao = 1;
 let showSensors = false;
-let qtdDinos = 3;
+let showNets = false;
+let qtdDinos = 8;
 let gameVelocity = 6;
 let step = 0;
 let bar = 0;
@@ -108,7 +109,7 @@ class RedeNeural {
 
         this.input_nodes = 5;
         this.hidden_nodes = 8;
-        this.output_nodes = 3;
+        this.output_nodes = 4;
 
         this.model = tf.sequential();
         this.model.add(tf.layers.dense({ units: this.hidden_nodes, inputShape: [this.input_nodes], activation: 'sigmoid' }));
@@ -201,6 +202,7 @@ class dino {
         this.acelerando = false;
         this.freando = false;
         this.padx = this.x * 0.25;
+        this.actions = ['Pulando','Acelerando','Freiando','Esperando'];
 
         this.redeNeural = new RedeNeural();
 
@@ -328,7 +330,7 @@ class dino {
             let resposta = this.redeNeural.pensar(inputs);
             let maiorI = 0;
             let maiorR = 0;
-            for (let i = 0; i < 3; i++) {
+            for (let i = 0; i < 4; i++) {
                 if (resposta[i] > maiorR) {
                     maiorR = resposta[i];
                     maiorI = i
@@ -340,12 +342,17 @@ class dino {
                 this.acelerar();
             } else if (maiorI == 2) {
                 this.freiar();
+            } else if (maiorI == 3) {
+                // Não toma nenhuma ação!
             }
 
-            if (showSensors) {
-                noStroke()
+            if (showSensors || showNets) {
+                noStroke();
+                textSize(10);
+                fill(80);
+                text(`Pula\nAcelera\nFreia\nEspera`, this.x+40, this.y - 130);
                 fill(255, 80, 80);
-                text(`Pula: ${resposta[0]}\nAcelera: ${resposta[1]}\nFreia: ${resposta[2]}\nM:${maiorI}`, this.x, this.y - 100);
+                text('\u2295', this.x+22, this.y - 130 +(maiorI*12.5));
             }
 
         }
@@ -515,6 +522,16 @@ function keyPressed() {
     if (key == 's') {
         showSensors = !showSensors;
     }
+    if (key == 'n') {
+        showNets = !showNets;
+    }
+
+    if (key == 'm') {
+        for (let dino of dinos) {
+            dino.morrer();
+        }
+    }
+
 
 }
 function mousePressed() {
@@ -591,11 +608,6 @@ function draw() {
 
     if (keyIsDown(65)) { // a http://www.foreui.com/articles/Key_Code_Table.htm
         dinos.push(new dino(false,true));
-    }
-    if (keyIsDown(77)) { // m
-        for (let dino of dinos) {
-            dino.morrer();
-        }
     }
 
     terreno.show();
