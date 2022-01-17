@@ -53,6 +53,45 @@ let fpsAtu = 0;
 //     }
 // }
 
+let particlesArray = [];
+let hue = 0;
+class Particle {
+    constructor() {
+        this.x = width-40;
+        this.y = height-40;
+        this.size = Math.random() * 7 +3;
+        this.speedY = (Math.random() * 1) - 0.5;
+        this.color = 'hsla('+hue+',100%,50%,0.8)';       
+    }
+    update() {
+        this.x -= 6;
+        this.y += this.speedY;
+    }
+    show() {
+        fill(this.color);
+        // circle(this.x, this.y, this.size,0,Math.PI * 2);
+        circle(this.x, this.y, this.size,0,Math.PI * 2);
+        if (hue > 400) {
+            hue = 0;
+        }
+    }
+}
+
+function handleParticles() {
+    particlesArray.unshift(new Particle);
+    for ( i = 0;i < particlesArray.length; i++) {
+        particlesArray[i].update();
+        particlesArray[i].show();
+    }
+    if (particlesArray.length > 200) {
+        for (let i = 0;i<20;i++) {
+            particlesArray.pop(particlesArray[i]);
+        }
+
+    }
+
+}
+
 class Nuvem {
     constructor(x, y) {
         this.x = x;
@@ -347,12 +386,14 @@ class dino {
             }
 
             if (showSensors || showNets) {
+                stroke(200);
+                line(this.x+40,height-275, this.x+40, this.y);
                 noStroke();
                 textSize(10);
                 fill(80);
-                text(`Pula\nAcelera\nFreia\nEspera`, this.x+40, this.y - 130);
+                text(`Pula\nAcelera\nFreia\nEspera`, this.x+40, height-320);
                 fill(255, 80, 80);
-                text('\u2295', this.x+22, this.y - 130 +(maiorI*12.5));
+                text('\u2295', this.x+22, height-320 +(maiorI*12.5));
             }
 
         }
@@ -477,6 +518,7 @@ function nextGeneration() {
     nGeracao++;
     fpsMax = 0;
     fpsMin = 999;
+    hue = 0;
 
     // console.log(`Geração ${nGeracao}! Clonando ${colocacao[0].name} com Score: ${colocacao[0].score.toFixed(0)}!`)
 
@@ -588,6 +630,8 @@ function draw() {
 
     background(255 - (slider.value() * 30));
     // scale(1.2);  // Zoom
+    hue++;
+    handleParticles();
 
     if (keyIsDown(RIGHT_ARROW)) {
 

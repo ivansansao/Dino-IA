@@ -1,5 +1,5 @@
 node_modules/
-testes.js
+testes*.js
 .env
 .nuxt
 dist
