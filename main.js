@@ -56,12 +56,12 @@ let fpsAtu = 0;
 let particlesArray = [];
 let hue = 0;
 class Particle {
-    constructor() {
-        this.x = width-40;
-        this.y = height-40;
-        this.size = Math.random() * 7 +3;
-        this.speedY = (Math.random() * 1) - 0.5;
-        this.color = 'hsla('+hue+',100%,50%,0.8)';       
+    constructor(x, y) {
+        this.x = x || width - 40;
+        this.y = y || height - 40;
+        this.size = Math.random() * 7 + 3;
+        this.speedY = (Math.random() * 1) - 1.5; // Original é -0.5
+        this.color = 'hsla(' + hue + ',100%,50%,0.8)';
     }
     update() {
         this.x -= 6;
@@ -70,21 +70,21 @@ class Particle {
     show() {
         fill(this.color);
         // circle(this.x, this.y, this.size,0,Math.PI * 2);
-        circle(this.x, this.y, this.size,0,Math.PI * 2);
+        circle(this.x, this.y, this.size, 0, Math.PI * 2);
         if (hue > 400) {
             hue = 0;
         }
     }
 }
 
-function handleParticles() {
-    particlesArray.unshift(new Particle);
-    for ( i = 0;i < particlesArray.length; i++) {
+function handleParticles(x, y) {
+    particlesArray.unshift(new Particle(x, y));
+    for (i = 0; i < particlesArray.length; i++) {
         particlesArray[i].update();
         particlesArray[i].show();
     }
     if (particlesArray.length > 200) {
-        for (let i = 0;i<20;i++) {
+        for (let i = 0; i < 20; i++) {
             particlesArray.pop(particlesArray[i]);
         }
 
@@ -135,11 +135,11 @@ class Terreno {
         this.x3 -= gameVelocity;
 
         if (this.x1 + this.largura < 0)
-            this.x1 = this.largura * 2;
+            this.x1 = (this.largura-gameVelocity) * 2;
         if (this.x2 + this.largura < 0)
-            this.x2 = this.largura * 2;
+            this.x2 = (this.largura-gameVelocity) * 2;
         if (this.x3 + this.largura < 0)
-            this.x3 = this.largura * 2;
+            this.x3 = (this.largura-gameVelocity) * 2;
     }
 }
 
@@ -231,7 +231,7 @@ class dino {
         this.r = this.altura / 2;
         this.d = this.r * 2;
 
-        this.y = random(100, height);
+        this.y = random(-200, 0);
         this.gravity = 1;
         this.lift = -20; // Içar
         this.velocity = 0;
@@ -241,7 +241,7 @@ class dino {
         this.acelerando = false;
         this.freando = false;
         this.padx = this.x * 0.25;
-        this.actions = ['Pulando','Acelerando','Freiando','Esperando'];
+        this.actions = ['Pulando', 'Acelerando', 'Freiando', 'Esperando'];
 
         this.redeNeural = new RedeNeural();
 
@@ -387,13 +387,13 @@ class dino {
 
             if (showSensors || showNets) {
                 stroke(200);
-                line(this.x+40,height-275, this.x+40, this.y);
+                line(this.x + 40, height - 275, this.x + 40, this.y);
                 noStroke();
                 textSize(10);
                 fill(80);
-                text(`Pula\nAcelera\nFreia\nEspera`, this.x+40, height-320);
+                text(`Pula\nAcelera\nFreia\nEspera`, this.x + 40, height - 320);
                 fill(255, 80, 80);
-                text('\u2295', this.x+22, height-320 +(maiorI*12.5));
+                text('\u2295', this.x + 22, height - 320 + (maiorI * 12.5));
             }
 
         }
@@ -561,6 +561,13 @@ function proximoObstaculo(dino, obstaculos) {
 
 function keyPressed() {
 
+    if (key == ' ') {
+        for (let dino of dinos) {
+            if (!dino.inteligente) {
+                dino.up();
+            }
+        }
+    }
     if (key == 's') {
         showSensors = !showSensors;
     }
@@ -631,7 +638,6 @@ function draw() {
     background(255 - (slider.value() * 30));
     // scale(1.2);  // Zoom
     hue++;
-    handleParticles();
 
     if (keyIsDown(RIGHT_ARROW)) {
 
@@ -651,7 +657,7 @@ function draw() {
     }
 
     if (keyIsDown(65)) { // a http://www.foreui.com/articles/Key_Code_Table.htm
-        dinos.push(new dino(false,true));
+        dinos.push(new dino(false, true));
     }
 
     terreno.show();
@@ -748,6 +754,7 @@ function draw() {
     }
     colocacao.sort(function (a, b) { return b.x - a.x });
 
+    handleParticles(colocacao[0].x + 6, colocacao[0].y + 35);
 
     fill(100);
     noStroke();
