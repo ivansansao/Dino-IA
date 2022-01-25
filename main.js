@@ -577,20 +577,21 @@ class dino {
         const pesos2 = this.redeNeural.model.getWeights()[2].flatten().arraySync();
 
         const corDesligado = [242, 242, 242];
-        const corLigado = this.corFundo; // [128, 179,255];
+        const corLigado = [255, 80, 80];
 
         const offsetX = width * 0.5;
         const offsetY = height * 0.1;
         const y = offsetY;
-        const padLinha = 50;
+        const padLinha = 44;
 
         const col1 = offsetX;
-        const col2 = offsetX + 100;
-        const col3 = offsetX + 200;
+        const col2 = offsetX + 150;
+        const col3 = offsetX + 300;
 
         const row1 = offsetY + 54;
         const row2 = offsetY + 0;
         const row3 = offsetY + 84;
+        const offsetT = 3;
 
 
         // LINHAS
@@ -679,11 +680,11 @@ class dino {
 
             fill(0);
             textAlign(RIGHT);
-            text(inputNames[i], col1 - 30, row1 + (i * padLinha));
+            text(inputNames[i], col1 - 30, offsetT + row1 + (i * padLinha));
 
             fill(0);
             textAlign(CENTER);
-            text(this.redeNeural.savedInputs[i].toFixed(2), col1, row1 + (i * padLinha));
+            text(this.redeNeural.savedInputs[i].toFixed(2), col1, offsetT + row1 + (i * padLinha));
 
         }
 
@@ -692,7 +693,7 @@ class dino {
         // Camada escondida.
 
         for (let i = 0; i < this.redeNeural.firstLayer.length; i++) {
-            text(this.redeNeural.firstLayer[i].toFixed(3), col2, row2 + (i * padLinha));
+            text(this.redeNeural.firstLayer[i].toFixed(3), col2, offsetT + row2 + (i * padLinha));
         }
 
         // Última camada!
@@ -701,15 +702,15 @@ class dino {
 
             fill(0);
             textAlign(LEFT);
-            text(outputNames[i], col3 + 30, row3 + (i * padLinha));
+            text(outputNames[i], col3 + 30, offsetT+ row3 + (i * padLinha));
 
             fill(0);
             textAlign(CENTER);
-            text(this.redeNeural.savedOutputs[i].toFixed(3), col3, row3 + (i * padLinha));
+            text(this.redeNeural.savedOutputs[i].toFixed(3), col3, offsetT+ row3 + (i * padLinha));
         }
 
-        textSize(8);
-        textAlign(RIGHT);
+        // textSize(8);
+        // textAlign(RIGHT);
 
         // PESOS
         // for (let i = 0; i < pesos1.length; i++) {
