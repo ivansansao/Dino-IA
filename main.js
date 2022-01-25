@@ -11,6 +11,7 @@ O de TINT() deixa lento!
 let imprimirRNMelhor = false;
 let evolucao = [];
 let inputNames = ['Posição', 'Distância', 'Altura', 'Largura', 'Velocidade'];
+let outputNames = ['Pula', 'Acelera', 'Freia', 'Espera'];
 let nGeracao = 1;
 let showSensors = false;
 let showNets = false;
@@ -159,9 +160,12 @@ class RedeNeural {
         const output2 = denseLayer2.apply(output1);
         this.model = tf.model({ inputs: input, outputs: [output1, output2] });
 
-        this.firstLayer = null;
-        this.secondLayer = null;
-        this.savedInputs = null;
+        this.firstLayer = [];
+        this.secondLayer = [];
+        this.savedInputs = [];
+        this.savedOutputs = [];
+        this.selectedOutput = -1;
+        this.maiorValueHidden = -1;
 
     }
     pensar(inputs = [1, 2, 3, 4, 5]) {
@@ -175,10 +179,25 @@ class RedeNeural {
             this.firstLayer = firstLayer.flatten().arraySync();
             this.secondLayer = secondLayer.flatten().arraySync();
             this.savedInputs = inputs;
+            this.savedOutputs = outputs;
+
+            this.saveMaiorHidput(this.firstLayer);
 
             return outputs
         });
     }
+
+    saveMaiorHidput(layer) {
+        this.maiorValueHidden = -1;
+        
+        for (let i = 0; i < layer.length; i++) {
+            if (layer[i] > this.maiorValueHidden) {
+                this.maiorValueHidden = layer[i];
+            }
+        }
+
+    }
+
     imprimirRede() {
         const weights = this.model.getWeights();
         let linhas = '';
@@ -201,11 +220,13 @@ class RedeNeural {
         console.log(this.firstLayer);
         console.log('------ SEGUNDA CAMADA -------');
         console.log(this.secondLayer);
+        console.log(this.model.getWeights().length);
+        console.log(this.model.layers);
 
 
         console.log('------ PESOS ANTES -------');
         for (let i = 0; i < this.model.getWeights().length; i++) {
-            console.log(this.model.getWeights()[i].print());
+            console.log(i, this.model.getWeights()[i].dataSync());
 
         }
 
@@ -258,6 +279,7 @@ class OLD_RedeNeural {
             return outputs
         });
     }
+
     imprimirRede() {
         const weights = this.model.getWeights();
         let linhas = '';
@@ -276,12 +298,12 @@ class OLD_RedeNeural {
         }
     }
     imprimir() {
-        console.log('------ SEPARACAO ANTES -------');
-        for (let i = 0; i < this.model.getWeights().length; i++) {
-            console.log(this.model.getWeights()[i].print());
+        // console.log('------ SEPARACAO ANTES -------');
+        // for (let i = 0; i < this.model.getWeights().length; i++) {
+        //     console.log(this.model.getWeights()[i].print());
 
-        }
-        console.log('------ SEPARACAO depois -------');
+        // }
+        // console.log('------ SEPARACAO depois -------');
 
 
 
@@ -477,6 +499,8 @@ class dino {
                 // Não toma nenhuma ação!
             }
 
+            this.redeNeural.selectedOutput = maiorI;
+
             if (showSensors || showNets) {
 
                 // Primeira camada.
@@ -486,8 +510,8 @@ class dino {
                 textAlign(RIGHT);
 
                 for (let i = 0; i < this.redeNeural.savedInputs.length; i++) {
-                    
-                    
+
+
                     fill(80, 200, 140);
                     text(inputNames[i], this.x - 80, height - 330 + (i * 12.5));
 
@@ -545,6 +569,160 @@ class dino {
         if (this.redeNeural.model != null) {
             // this.redeNeural.model.dispose();
         }
+    }
+
+    showRedeNeural() {
+
+        const pesos1 = this.redeNeural.model.getWeights()[0].flatten().arraySync();
+        const pesos2 = this.redeNeural.model.getWeights()[2].flatten().arraySync();
+
+        const corDesligado = [242, 242, 242];
+        const corLigado = this.corFundo; // [128, 179,255];
+
+        const offsetX = width * 0.5;
+        const offsetY = height * 0.1;
+        const y = offsetY;
+        const padLinha = 50;
+
+        const col1 = offsetX;
+        const col2 = offsetX + 100;
+        const col3 = offsetX + 200;
+
+        const row1 = offsetY + 54;
+        const row2 = offsetY + 0;
+        const row3 = offsetY + 84;
+
+
+        // LINHAS
+
+        textAlign(LEFT);
+        strokeWeight(1);
+        stroke(200);
+
+        // LINHAS CAMADA 1->2
+
+        for (let f = 0; f < this.redeNeural.savedInputs.length; f++) {
+            for (let h = 0; h < this.redeNeural.firstLayer.length; h++) {
+                if (this.redeNeural.firstLayer[h] == this.redeNeural.maiorValueHidden) {
+                    stroke(255,0,0);
+                    line(col1, row1 + (f * padLinha), col2, row2 + (h * padLinha))
+                } else {
+                    stroke(200);
+                    line(col1, row1 + (f * padLinha), col2, row2 + (h * padLinha))
+                }
+            }
+        }
+
+        // LINHAS CAMADA 2->3
+
+        for (let h = 0; h < this.redeNeural.firstLayer.length; h++) {
+
+            for (let o = 0; o < this.redeNeural.savedOutputs.length; o++) {
+
+                if (this.redeNeural.firstLayer[h] == this.redeNeural.maiorValueHidden 
+                    && o == this.redeNeural.selectedOutput) {
+                    stroke(255,0,0);
+                    line(col2, row2 + (h * padLinha), col3, row3 + (o * padLinha))
+                } else  {       
+                    stroke(200);             
+                    line(col2, row2 + (h * padLinha), col3, row3 + (o * padLinha))
+                }
+            }
+
+        }
+
+        // NEURÓNIOS.
+
+        fill(corDesligado);
+        stroke(150);
+
+        for (let f = 0; f < this.redeNeural.savedInputs.length; f++) {
+            for (let h = 0; h < this.redeNeural.firstLayer.length; h++) {
+                circle(col1, row1 + (f * padLinha), 40);
+            }
+        }
+        for (let f = 0; f < this.redeNeural.savedInputs.length; f++) {
+            for (let h = 0; h < this.redeNeural.firstLayer.length; h++) {
+                if (this.redeNeural.firstLayer[h] == this.redeNeural.maiorValueHidden) {
+                    fill(corLigado);
+                    circle(col2, row2 + (h * padLinha), 40);
+                    
+                } else {
+                    fill(corDesligado);
+                    circle(col2, row2 + (h * padLinha), 40);
+                }
+            }
+        }
+        for (let h = 0; h < this.redeNeural.firstLayer.length; h++) {
+            for (let o = 0; o < this.redeNeural.savedOutputs.length; o++) {
+
+                if (o == this.redeNeural.selectedOutput) {
+                    fill(corLigado);
+                } else {
+                    fill(corDesligado);
+                }
+                circle(col3, row3 + (o * padLinha), 40);
+            }
+
+        }
+
+        // VALORES DOS NEURÓNIOS
+
+        // Primeira camada.
+
+        noStroke();
+        textSize(10);
+        fill(0);
+        textAlign(CENTER);
+
+        for (let i = 0; i < this.redeNeural.savedInputs.length; i++) {
+
+            fill(0);
+            textAlign(RIGHT);
+            text(inputNames[i], col1 - 30, row1 + (i * padLinha));
+
+            fill(0);
+            textAlign(CENTER);
+            text(this.redeNeural.savedInputs[i].toFixed(2), col1, row1 + (i * padLinha));
+
+        }
+
+
+
+        // Camada escondida.
+
+        for (let i = 0; i < this.redeNeural.firstLayer.length; i++) {
+            text(this.redeNeural.firstLayer[i].toFixed(3), col2, row2 + (i * padLinha));
+        }
+
+        // Última camada!
+
+        for (let i = 0; i < this.redeNeural.savedOutputs.length; i++) {
+
+            fill(0);
+            textAlign(LEFT);
+            text(outputNames[i], col3 + 30, row3 + (i * padLinha));
+
+            fill(0);
+            textAlign(CENTER);
+            text(this.redeNeural.savedOutputs[i].toFixed(3), col3, row3 + (i * padLinha));
+        }
+
+        textSize(8);
+        textAlign(RIGHT);
+
+        // PESOS
+        // for (let i = 0; i < pesos1.length; i++) {
+        //     text(pesos1[i].toFixed(2), col1 + 60, y + (i * 8));
+        // }
+
+        // for (let i = 0; i < pesos2.length; i++) {
+        //     text(pesos2[i].toFixed(2), col1 + 160, y + (i * 8));
+        // }
+
+        textAlign(LEFT);
+
+
     }
 
 }
@@ -1025,6 +1203,11 @@ function draw() {
             point(goX, goY);
         }
     }
+
+    // Imprime a rede neural do melhor jogador.
+    colocacao[0].showRedeNeural();
+
+    // Another
 
     if (keyIsDown(DOWN_ARROW)) {
         console.log(colocacao[0].name);
