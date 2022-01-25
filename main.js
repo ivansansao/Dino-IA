@@ -10,6 +10,7 @@ O de TINT() deixa lento!
 
 let imprimirRNMelhor = false;
 let evolucao = [];
+let inputNames = ['Posição', 'Distância', 'Altura', 'Largura', 'Velocidade'];
 let nGeracao = 1;
 let showSensors = false;
 let showNets = false;
@@ -135,15 +136,106 @@ class Terreno {
         this.x3 -= gameVelocity;
 
         if (this.x1 + this.largura < 0)
-            this.x1 = (this.largura-gameVelocity) * 2;
+            this.x1 = (this.largura - gameVelocity) * 2;
         if (this.x2 + this.largura < 0)
-            this.x2 = (this.largura-gameVelocity) * 2;
+            this.x2 = (this.largura - gameVelocity) * 2;
         if (this.x3 + this.largura < 0)
-            this.x3 = (this.largura-gameVelocity) * 2;
+            this.x3 = (this.largura - gameVelocity) * 2;
     }
 }
 
+
 class RedeNeural {
+    constructor() {
+
+        const input_nodes = 5;
+        const hidden_nodes = 8;
+        const output_nodes = 4;
+
+        const input = tf.input({ shape: [input_nodes] });
+        const denseLayer1 = tf.layers.dense({ units: hidden_nodes, activation: 'sigmoid' });
+        const denseLayer2 = tf.layers.dense({ units: output_nodes, activation: 'softmax' });
+        const output1 = denseLayer1.apply(input);
+        const output2 = denseLayer2.apply(output1);
+        this.model = tf.model({ inputs: input, outputs: [output1, output2] });
+
+        this.firstLayer = null;
+        this.secondLayer = null;
+        this.savedInputs = null;
+
+    }
+    pensar(inputs = [1, 2, 3, 4, 5]) {
+
+        return tf.tidy(() => {
+
+            const xs = tf.tensor2d([inputs]);
+            const [firstLayer, secondLayer] = this.model.predict(xs);
+            const outputs = secondLayer.dataSync();
+
+            this.firstLayer = firstLayer.flatten().arraySync();
+            this.secondLayer = secondLayer.flatten().arraySync();
+            this.savedInputs = inputs;
+
+            return outputs
+        });
+    }
+    imprimirRede() {
+        const weights = this.model.getWeights();
+        let linhas = '';
+        let colunas = '';
+
+        for (let i = 0; i < weights.length; i++) {
+            let tensor = weights[i];
+            let values = tensor.dataSync().slice();
+            colunas = '';
+            for (let j = 0; j < values.length; j++) {
+                let w = values[j];
+                colunas = `${colunas} ${w}`;
+            }
+
+            text(`${colunas}`, width / 4, 70 + (i * 20));
+        }
+    }
+    imprimir() {
+        console.log('------ PRIMEIRA CAMADA -------');
+        console.log(this.firstLayer);
+        console.log('------ SEGUNDA CAMADA -------');
+        console.log(this.secondLayer);
+
+
+        console.log('------ PESOS ANTES -------');
+        for (let i = 0; i < this.model.getWeights().length; i++) {
+            console.log(this.model.getWeights()[i].print());
+
+        }
+
+
+
+
+    }
+    mutate(rate) {
+        tf.tidy(() => {
+            const weights = this.model.getWeights();
+            const mutatedWeights = [];
+            for (let i = 0; i < weights.length; i++) {
+                let tensor = weights[i];
+                let shape = weights[i].shape;
+                let values = tensor.dataSync().slice();
+                for (let j = 0; j < values.length; j++) {
+                    if (random(1) < rate) {
+                        let w = values[j];
+                        values[j] = w + randomGaussian();
+                    }
+                }
+                let newTensor = tf.tensor(values, shape);
+                mutatedWeights[i] = newTensor;
+            }
+            this.model.setWeights(mutatedWeights);
+        });
+    }
+}
+
+class OLD_RedeNeural {
     constructor() {
 
         this.input_nodes = 5;
@@ -386,6 +478,37 @@ class dino {
             }
 
             if (showSensors || showNets) {
+
+                // Primeira camada.
+
+                noStroke();
+                textSize(10);
+                textAlign(RIGHT);
+
+                for (let i = 0; i < this.redeNeural.savedInputs.length; i++) {
+                    
+                    
+                    fill(80, 200, 140);
+                    text(inputNames[i], this.x - 80, height - 330 + (i * 12.5));
+
+                    fill(55, 80, 180);
+                    text(this.redeNeural.savedInputs[i].toFixed(2), this.x - 30, height - 330 + (i * 12.5));
+
+                }
+
+                // Camada escondida.
+
+                textAlign(LEFT);
+                noStroke();
+                textSize(10);
+                fill(255, 80, 80);
+
+                for (let i = 0; i < this.redeNeural.firstLayer.length; i++) {
+                    text(this.redeNeural.firstLayer[i].toFixed(3), this.x - 22, height - 345 + (i * 12.5));
+
+                }
+
+                // Última camada!
                 stroke(200);
                 line(this.x + 40, height - 275, this.x + 40, this.y);
                 noStroke();
@@ -906,6 +1029,8 @@ function draw() {
     if (keyIsDown(DOWN_ARROW)) {
         console.log(colocacao[0].name);
         colocacao[0].redeNeural.imprimir();
+        console.log('ImprimirRede ->')
+        colocacao[0].redeNeural.imprimirRede();
         noLoop();
     }
     if (imprimirRNMelhor) {
