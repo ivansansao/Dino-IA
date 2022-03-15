@@ -8,6 +8,8 @@ YOUTUBE (Clique nessa imagem para abrir o vídeo no YouTube)
 
 [![Watch the video](src/assets/asset1.png)](https://youtu.be/_Hvofo-71D4)
 
+[Assista ao vídeo](https://youtu.be/_Hvofo-71D4)
+
 PRINT
 ![Alt text](src/assets/asset2.png?raw=true "Dino")
 
