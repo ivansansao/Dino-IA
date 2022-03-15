@@ -10,3 +10,10 @@ PRINT
 
 PRINT
 ![Alt text](src/assets/asset3.png?raw=true "Dino")
+
+
+Teclas de comandos:
+
+a - Adiciona mais dinos à corrida
+n - Mostra os neurônios de todos os dinos
+m - Elimina todos os dinos
